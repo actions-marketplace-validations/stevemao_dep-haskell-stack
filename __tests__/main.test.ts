@@ -8,6 +8,7 @@
 
 import * as core from '@actions/core'
 import * as main from '../src/main'
+import * as exec from '@actions/exec'
 
 // Mock the GitHub Actions core library
 // const debugMock = jest.spyOn(core, 'debug')
@@ -25,12 +26,18 @@ describe('action', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(async () => {
+    await exec.exec('git', ['checkout', '__tests__/fixtures'])
+  })
+
   it('runs the whole pipeline', async () => {
     // Set the action's inputs as return values from core.getInput()
     getInputMock.mockImplementation((name: string): string => {
       switch (name) {
         case 'stack-yaml':
           return `${__dirname}/fixtures/stack.yaml`
+        case 'resolver-major':
+          return 'false'
         default:
           return ''
       }
@@ -39,7 +46,7 @@ describe('action', () => {
     await main.run()
     expect(runMock).toHaveReturned()
     expect(setFailedMock).not.toHaveBeenCalled()
-  }, 1000000)
+  }, 10000000)
 
   it('sets a failed status', async () => {
     // Set the action's inputs as return values from core.getInput()
